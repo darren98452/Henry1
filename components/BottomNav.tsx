@@ -20,7 +20,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ items, activeItem, onItemClick })
               key={item.id}
               onClick={() => onItemClick(item.id)}
               className={`flex flex-col items-center justify-center w-full transition-colors duration-200 ${
-                isActive ? 'text-primary' : 'text-slate-500 hover:text-primary'
+                isActive ? 'text-primary' : 'text-neutral-content hover:text-primary'
               }`}
             >
               <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />

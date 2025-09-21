@@ -32,8 +32,8 @@ const PracticeCard: React.FC<{title: string, description: string, icon: React.Re
                 {icon}
             </div>
             <div>
-            <h3 className="text-xl font-title font-bold text-slate-900">{title}</h3>
-            <p className="text-slate-600 mt-1">{description}</p>
+            <h3 className="text-xl font-title font-bold text-neutral">{title}</h3>
+            <p className="text-neutral-content mt-1">{description}</p>
             </div>
         </motion.button>
     );
@@ -59,8 +59,8 @@ const PracticeView: React.FC<PracticeViewProps> = ({ vocabulary }) => {
         return (
           <div className="space-y-6">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                <h1 className="text-3xl font-title font-bold text-slate-900 mb-2">Practice Zone</h1>
-                <p className="text-slate-600">Choose an activity to test your knowledge.</p>
+                <h1 className="text-3xl font-title font-bold text-neutral mb-2">Practice Zone</h1>
+                <p className="text-neutral-content">Choose an activity to test your knowledge.</p>
             </motion.div>
             
             <div className="space-y-4">

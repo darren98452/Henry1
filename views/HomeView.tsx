@@ -117,7 +117,7 @@ const HomeView: React.FC<HomeViewProps> = ({ vocabulary, onNavigateToDictionary,
                     <h1 className="text-2xl font-title font-bold text-neutral">
                         Hello, {userName}!
                     </h1>
-                    <p className="text-slate-600 text-sm">Let's make today a productive day.</p>
+                    <p className="text-neutral-content text-sm">Let's make today a productive day.</p>
                 </div>
                 <Mascot size="sm" />
             </div>
@@ -158,7 +158,7 @@ const HomeView: React.FC<HomeViewProps> = ({ vocabulary, onNavigateToDictionary,
                     </div>
                     <div>
                         <p className="text-lg font-title font-bold text-neutral">Dictionary</p>
-                        <p className="text-xs text-slate-600">Look up any word</p>
+                        <p className="text-xs text-neutral-content">Look up any word</p>
                     </div>
                 </motion.button>
                 <motion.button
@@ -171,7 +171,7 @@ const HomeView: React.FC<HomeViewProps> = ({ vocabulary, onNavigateToDictionary,
                     </div>
                     <div>
                         <p className="text-lg font-title font-bold text-neutral">Play Games</p>
-                        <p className="text-xs text-slate-600">Test your skills</p>
+                        <p className="text-xs text-neutral-content">Test your skills</p>
                     </div>
                 </motion.button>
             </motion.div>
@@ -193,7 +193,7 @@ const HomeView: React.FC<HomeViewProps> = ({ vocabulary, onNavigateToDictionary,
                 {isQuoteLoading ? <div className="h-12 flex items-center justify-center"><Loader /></div> : 
                 quote ? (
                     <figure>
-                        <blockquote className="italic text-slate-700 text-center text-sm">
+                        <blockquote className="italic text-neutral-content text-center text-sm">
                         “{quote.quote}”
                         </blockquote>
                         <figcaption className="text-right mt-1 text-xs font-semibold text-primary">
@@ -201,7 +201,7 @@ const HomeView: React.FC<HomeViewProps> = ({ vocabulary, onNavigateToDictionary,
                         </figcaption>
                     </figure>
                 ) : (
-                    <p className="text-slate-500 text-center text-sm">Could not load a quote today.</p>
+                    <p className="text-neutral-content text-center text-sm">Could not load a quote today.</p>
                 )}
               </div>
             </motion.div>

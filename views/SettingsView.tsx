@@ -30,7 +30,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ settingsHook }) => {
         <h3 className="text-xl font-title font-bold text-neutral mb-4">Account</h3>
         <div className="bg-base-100 p-4 rounded-xl shadow-sm">
           <div className="flex justify-between items-center">
-            <label className="text-slate-600">Name</label>
+            <label className="text-neutral-content">Name</label>
             {editingName ? (
               <div className="flex items-center space-x-2">
                 <input
@@ -47,7 +47,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ settingsHook }) => {
             ) : (
               <div className="flex items-center space-x-3">
                 <span className="font-semibold text-neutral">{settings.userName}</span>
-                <button onClick={() => setEditingName(true)} className="text-slate-500 hover:text-primary p-1">
+                <button onClick={() => setEditingName(true)} className="text-neutral-content hover:text-primary p-1">
                   <Edit size={16} />
                 </button>
               </div>
@@ -64,7 +64,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ settingsHook }) => {
           <div>
              <div className="flex items-center space-x-2 mb-3">
                <Palette className="text-primary" />
-               <h4 className="font-semibold text-slate-700">Theme</h4>
+               <h4 className="font-semibold text-neutral">Theme</h4>
              </div>
              <div className="grid grid-cols-3 gap-4">
                 {Object.keys(themes).map((themeKey) => {
@@ -82,7 +82,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ settingsHook }) => {
                                 <div className="w-1/3 h-8 rounded" style={{ backgroundColor: theme.secondary }}></div>
                                 <div className="w-1/3 h-8 rounded" style={{ backgroundColor: theme['base-200'] }}></div>
                             </div>
-                            <p className={`capitalize mt-2 text-sm font-semibold ${isActive ? 'text-primary' : 'text-slate-600'}`}>{themeName}</p>
+                            <p className={`capitalize mt-2 text-sm font-semibold ${isActive ? 'text-primary' : 'text-neutral-content'}`}>{themeName}</p>
                         </button>
                     )
                 })}

@@ -93,7 +93,7 @@ const Quiz: React.FC<QuizProps> = ({ vocabulary, onFinish }) => {
   if (questions.length === 0) {
       return (
           <div className="text-center p-8 bg-base-100 rounded-lg shadow-md">
-              <p className="text-slate-700">Could not load quiz questions. Please try again later.</p>
+              <p className="text-neutral-content">Could not load quiz questions. Please try again later.</p>
               <button onClick={onFinish} className="mt-4 bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-primary-focus transition-colors">
                   Back to Practice
               </button>
@@ -105,10 +105,10 @@ const Quiz: React.FC<QuizProps> = ({ vocabulary, onFinish }) => {
     return (
       <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center p-8 bg-base-100 rounded-lg shadow-xl animate-fade-in">
         <h2 className="text-3xl font-title font-bold text-primary mb-4">Quiz Complete!</h2>
-        <p className="text-xl text-slate-800 mb-2">You scored</p>
+        <p className="text-xl text-neutral mb-2">You scored</p>
         <p className="text-5xl font-extrabold text-secondary mb-6">{score} / {questions.length}</p>
         <StarRating score={score} total={questions.length} />
-        <p className="mt-6 text-slate-600">Your progress has been updated.</p>
+        <p className="mt-6 text-neutral-content">Your progress has been updated.</p>
         <button onClick={onFinish} className="mt-8 w-full bg-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-primary-focus transition-colors text-lg">
           Finish
         </button>
@@ -123,7 +123,7 @@ const Quiz: React.FC<QuizProps> = ({ vocabulary, onFinish }) => {
     <div className="w-full">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-2xl font-title font-bold text-primary">Quiz Time!</h2>
-        <p className="font-semibold text-slate-600">{currentQuestionIndex + 1} / {questions.length}</p>
+        <p className="font-semibold text-neutral-content">{currentQuestionIndex + 1} / {questions.length}</p>
       </div>
       <div className="bg-base-100 p-6 rounded-lg shadow-md">
         <AnimatePresence mode="wait">
@@ -134,7 +134,7 @@ const Quiz: React.FC<QuizProps> = ({ vocabulary, onFinish }) => {
             exit={{ opacity: 0, x: -50 }}
             transition={{ duration: 0.3 }}
         >
-            <p className="text-lg text-slate-800 font-medium mb-6 min-h-[5em]">{currentQuestion.definition}</p>
+            <p className="text-lg text-neutral font-medium mb-6 min-h-[5em]">{currentQuestion.definition}</p>
             <div className="space-y-3">
             {currentQuestion.options.map((option) => {
                 const isCorrectAnswer = option === currentQuestion.correctAnswer;
@@ -183,7 +183,7 @@ const Quiz: React.FC<QuizProps> = ({ vocabulary, onFinish }) => {
                           <h3 className="text-sm font-bold text-neutral">
                               The correct answer is: {currentQuestion.correctAnswer}
                           </h3>
-                          <div className="mt-2 text-sm text-slate-700">
+                          <div className="mt-2 text-sm text-neutral-content">
                               <p>{currentQuestion.explanation}</p>
                           </div>
                       </div>

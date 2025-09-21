@@ -132,8 +132,8 @@ const WordleGame: React.FC<WordleGameProps> = ({ vocabulary, onFinish }) => {
     if (gameState === 'no-words') {
         return (
             <div className="text-center p-8 bg-base-100 rounded-lg shadow-md">
-                <p className="text-slate-700 font-semibold">Wordle requires 5-letter words.</p>
-                <p className="text-slate-600">Please learn more words to play this game.</p>
+                <p className="text-neutral font-semibold">Wordle requires 5-letter words.</p>
+                <p className="text-neutral-content">Please learn more words to play this game.</p>
                 <button onClick={onFinish} className="mt-4 bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-primary-focus transition-colors">
                     Back to Practice
                 </button>
@@ -182,7 +182,7 @@ const WordleGame: React.FC<WordleGameProps> = ({ vocabulary, onFinish }) => {
                     <h3 className={`text-2xl font-bold ${gameState === 'won' ? 'text-success' : 'text-error'}`}>
                         {gameState === 'won' ? 'You Won!' : 'Nice Try!'}
                     </h3>
-                    <p className="mt-2 text-slate-700">The word was: <span className="font-bold uppercase text-primary">{secretWord}</span></p>
+                    <p className="mt-2 text-neutral-content">The word was: <span className="font-bold uppercase text-primary">{secretWord}</span></p>
                     <button onClick={onFinish} className="mt-4 w-full bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-primary-focus transition-colors">
                         Back to Menu
                     </button>

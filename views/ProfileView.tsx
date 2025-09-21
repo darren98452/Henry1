@@ -6,7 +6,7 @@ import type { UseSocialReturn } from '../hooks/useSocial';
 import SettingsView from './SettingsView';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 import type { Word, User as UserType } from '../types';
-import { BookCopy, Target, User, Settings, Shield, Award, X, UserPlus, UserMinus } from 'lucide-react';
+import { BookCopy, Target, User, Settings, Award, X, UserPlus, UserMinus } from 'lucide-react';
 import Mascot from '../components/Mascot';
 import { MOCK_USERS, RANKS } from '../constants';
 
@@ -29,7 +29,7 @@ const StatCard: React.FC<{ label: string; value: string | number; icon: React.Re
             {icon}
         </div>
         <div>
-            <p className="text-sm text-slate-600">{label}</p>
+            <p className="text-sm text-neutral-content">{label}</p>
             <p className="text-xl font-bold text-neutral">{value}</p>
         </div>
     </div>
@@ -40,7 +40,7 @@ const TabButton: React.FC<{ label: string; icon: React.ReactNode; isActive: bool
     <button
       onClick={onClick}
       className={`w-full flex items-center justify-center space-x-2 font-semibold py-2 rounded-full transition-colors duration-300 ${
-        isActive ? 'bg-primary text-white shadow' : 'text-slate-600 hover:bg-base-200'
+        isActive ? 'bg-primary text-white shadow' : 'text-neutral-content hover:bg-base-200'
       }`}
     >
         {icon}
@@ -73,14 +73,14 @@ const LeaguesModal: React.FC<{onClose: () => void}> = ({ onClose }) => {
                     </button>
                 </div>
                 <div className="flex-grow overflow-y-auto space-y-4">
-                    {RANKS.map((rank) => {
+                    {[...RANKS].reverse().map((rank) => {
                         const RankIcon = rank.icon;
                         return (
                             <div key={rank.name} className="flex items-center space-x-4 p-4 bg-base-200 rounded-xl">
                                 <RankIcon className="w-12 h-12 flex-shrink-0" />
                                 <div>
                                     <h3 className="text-xl font-bold text-primary">{rank.name}</h3>
-                                    <p className="text-slate-600">Reach {rank.minWords} words learned</p>
+                                    <p className="text-neutral-content">Reach {rank.minWords} words learned</p>
                                 </div>
                             </div>
                         );
@@ -100,7 +100,7 @@ const ProfileContent: React.FC<{ vocabulary: UseVocabularyReturn, settingsHook: 
     const [leaderboardView, setLeaderboardView] = useState<'league' | 'friends'>('league');
     const RankIcon = progress.rank.icon;
     
-    // --- Leaderboard Logic ---
+    // --- Leaderboard & League Logic ---
     const currentUser: UserType = {
         id: 0, // Current user always has ID 0
         name: settings.userName,
@@ -114,11 +114,21 @@ const ProfileContent: React.FC<{ vocabulary: UseVocabularyReturn, settingsHook: 
     const leagueIndex = RANKS.findIndex(r => r.name === currentLeague.name);
     const nextLeague = leagueIndex < RANKS.length - 1 ? RANKS[leagueIndex + 1] : null;
 
+    let progressToNext = 0;
+    if (nextLeague) {
+        const wordsInCurrentLeague = progress.wordsLearned - currentLeague.minWords;
+        const wordsForNextLeague = nextLeague.minWords - currentLeague.minWords;
+        if (wordsForNextLeague > 0) {
+          progressToNext = Math.max(0, Math.min(100, Math.round((wordsInCurrentLeague / wordsForNextLeague) * 100)));
+        }
+    } else {
+        progressToNext = 100; // Maxed out
+    }
+    
     const leagueUsers = allUsers
         .filter(user => {
-            const isInLeague = user.wordsLearned >= currentLeague.minWords;
-            const isBelowNextLeague = nextLeague ? user.wordsLearned < nextLeague.minWords : true;
-            return isInLeague && isBelowNextLeague;
+            const userRank = [...RANKS].reverse().find(rank => user.wordsLearned >= rank.minWords) || RANKS[0];
+            return userRank.name === currentLeague.name;
         })
         .sort((a, b) => b.wordsLearned - a.wordsLearned);
         
@@ -144,30 +154,43 @@ const ProfileContent: React.FC<{ vocabulary: UseVocabularyReturn, settingsHook: 
                 <div className="grid grid-cols-2 gap-4">
                     <StatCard label="Words Learned" value={progress.wordsLearned} icon={<BookCopy size={24}/>} />
                     <StatCard label="Accuracy" value={`${progress.accuracy}%`} icon={<Target size={24} />} />
-                     <div className="col-span-2">
-                        <StatCard label="Current League" value={currentLeague.name} icon={<Shield size={24}/>} />
+                    
+                    <div className="col-span-2 bg-base-100 p-4 rounded-xl shadow-sm flex flex-col items-center text-center">
+                        <h3 className="text-sm font-semibold text-neutral-content w-full text-left mb-2">Current League</h3>
+                        <RankIcon className="w-20 h-20" />
+                        <p className="text-2xl font-bold text-neutral mt-2">{progress.rank.name}</p>
+                        
+                        {nextLeague && (
+                             <div className="w-full px-2 mt-3">
+                                <div className="w-full bg-base-200 rounded-full h-2.5">
+                                    <div className="bg-primary h-2.5 rounded-full" style={{ width: `${progressToNext}%` }}></div>
+                                </div>
+                                <p className="text-xs text-neutral-content mt-1">
+                                    {nextLeague.minWords - progress.wordsLearned} words to {nextLeague.name}
+                                </p>
+                            </div>
+                        )}
+                       
+                        <button onClick={() => setIsLeaguesModalOpen(true)} className="mt-4 w-full bg-primary/10 text-primary font-bold py-2 px-4 rounded-lg hover:bg-primary/20 transition-colors flex items-center justify-center space-x-2">
+                            <Award size={16} />
+                            <span>View All Leagues</span>
+                        </button>
                     </div>
                 </div>
             </motion.div>
             
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-xl font-title font-bold text-neutral">Leaderboard</h3>
-                  <button onClick={() => setIsLeaguesModalOpen(true)} className="text-sm font-semibold text-primary hover:underline flex items-center space-x-1">
-                      <Award size={16} />
-                      <span>View Leagues</span>
-                  </button>
-              </div>
-               <div className="flex bg-base-200 p-1 rounded-full mb-3">
+              <h3 className="text-xl font-title font-bold text-neutral">Leaderboard</h3>
+               <div className="flex bg-base-200 p-1 rounded-full my-3">
                 <button
                   onClick={() => setLeaderboardView('league')}
-                  className={`w-1/2 py-1.5 text-sm font-semibold rounded-full transition-colors ${leaderboardView === 'league' ? 'bg-primary text-white shadow' : 'text-slate-600'}`}
+                  className={`w-1/2 py-1.5 text-sm font-semibold rounded-full transition-colors ${leaderboardView === 'league' ? 'bg-primary text-white shadow' : 'text-neutral-content'}`}
                 >
                   My League
                 </button>
                 <button
                   onClick={() => setLeaderboardView('friends')}
-                  className={`w-1/2 py-1.5 text-sm font-semibold rounded-full transition-colors ${leaderboardView === 'friends' ? 'bg-primary text-white shadow' : 'text-slate-600'}`}
+                  className={`w-1/2 py-1.5 text-sm font-semibold rounded-full transition-colors ${leaderboardView === 'friends' ? 'bg-primary text-white shadow' : 'text-neutral-content'}`}
                 >
                   Friends
                 </button>
@@ -176,7 +199,7 @@ const ProfileContent: React.FC<{ vocabulary: UseVocabularyReturn, settingsHook: 
                    <ul className="space-y-1 max-h-60 overflow-y-auto">
                       {usersToShow.map((user, index) => (
                           <li key={user.id} className={`flex items-center space-x-3 p-2 rounded-lg ${user.isCurrentUser ? 'bg-primary/10' : ''}`}>
-                              <span className="font-bold text-lg text-slate-500 w-6 text-center">{index + 1}</span>
+                              <span className="font-bold text-lg text-neutral-content w-6 text-center">{index + 1}</span>
                               <img src={user.avatarUrl} alt={user.name} className="w-10 h-10 rounded-full" />
                               <span className="flex-grow font-semibold text-neutral">{user.name}</span>
                               <span className="font-bold text-primary w-24 text-right">{user.wordsLearned} words</span>
@@ -197,8 +220,13 @@ const ProfileContent: React.FC<{ vocabulary: UseVocabularyReturn, settingsHook: 
                           </li>
                       ))}
                       {usersToShow.length === 1 && usersToShow[0].isCurrentUser && (
-                          <li className="text-center p-4 text-slate-500">
+                          <li className="text-center p-4 text-neutral-content">
                              {leaderboardView === 'friends' ? 'Add friends from the "My League" tab!' : 'You are the only one in this league!'}
+                          </li>
+                      )}
+                      {usersToShow.length === 0 && (
+                          <li className="text-center p-4 text-neutral-content">
+                             {leaderboardView === 'friends' ? 'Add some friends to see them here!' : 'There\'s nobody in this league yet!'}
                           </li>
                       )}
                    </ul>
@@ -231,7 +259,7 @@ const ProfileContent: React.FC<{ vocabulary: UseVocabularyReturn, settingsHook: 
                             {bookmarkedWordsList.map((word: Word) => (
                                 <li key={word.word} className="py-3">
                                     <p className="font-bold text-primary">{word.word}</p>
-                                    <p className="text-sm text-slate-700">{word.definition}</p>
+                                    <p className="text-sm text-neutral-content">{word.definition}</p>
                                 </li>
                             ))}
                         </ul>

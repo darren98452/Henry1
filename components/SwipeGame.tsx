@@ -55,7 +55,7 @@ const SwipeGame: React.FC<SwipeGameProps> = ({ onFinish }) => {
       return (
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center p-8 bg-base-100 rounded-lg shadow-xl animate-fade-in">
           <h2 className="text-3xl font-title font-bold text-primary mb-4">Game Over!</h2>
-          <p className="text-xl text-slate-800 mb-2">You scored</p>
+          <p className="text-xl text-neutral mb-2">You scored</p>
           <p className="text-5xl font-extrabold text-secondary mb-6">{score} / {GAME_LENGTH}</p>
           <button onClick={onFinish} className="mt-8 w-full bg-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-primary-focus transition-colors text-lg">
             Finish
@@ -67,7 +67,7 @@ const SwipeGame: React.FC<SwipeGameProps> = ({ onFinish }) => {
     return (
         <div className="w-full flex flex-col items-center">
             <h2 className="text-2xl font-title font-bold text-primary mb-2">Synonym Swipe</h2>
-            <p className="text-slate-600 mb-4">{round + 1} / {GAME_LENGTH}</p>
+            <p className="text-neutral-content mb-4">{round + 1} / {GAME_LENGTH}</p>
              <div className="relative w-full h-80">
                 <AnimatePresence>
                     {isLoading ? (
@@ -88,7 +88,7 @@ const SwipeGame: React.FC<SwipeGameProps> = ({ onFinish }) => {
                         >
                             <h3 className="text-4xl font-bold text-primary">{card.word1}</h3>
                             <div className="my-4 h-px w-1/2 bg-base-300"></div>
-                            <h3 className="text-4xl font-bold text-slate-700">{card.word2}</h3>
+                            <h3 className="text-4xl font-bold text-neutral">{card.word2}</h3>
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -112,7 +112,7 @@ const SwipeGame: React.FC<SwipeGameProps> = ({ onFinish }) => {
                     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 </button>
             </div>
-             <p className="mt-4 text-slate-600">Are these words synonyms?</p>
+             <p className="mt-4 text-neutral-content">Are these words synonyms?</p>
         </div>
     );
 };

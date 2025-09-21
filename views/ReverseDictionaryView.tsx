@@ -33,8 +33,8 @@ const ReverseDictionaryView: React.FC = () => {
     return (
         <div className="space-y-6">
             <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-                <h1 className="text-3xl font-title font-bold text-slate-900">Reverse Dictionary</h1>
-                <p className="text-slate-600 mt-1">Describe a concept, and AI will find the word for it.</p>
+                <h1 className="text-3xl font-title font-bold text-neutral">Reverse Dictionary</h1>
+                <p className="text-neutral-content mt-1">Describe a concept, and AI will find the word for it.</p>
             </motion.div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -58,7 +58,7 @@ const ReverseDictionaryView: React.FC = () => {
                 {isLoading && <Loader message="AI is thinking..." />}
 
                 {!isLoading && results.length === 0 && !error && (
-                    <div className="text-center p-8 text-slate-500">
+                    <div className="text-center p-8 text-neutral-content">
                         <Mascot message="Struggling to find a word? Describe it to me and I'll do my best to find it!" />
                     </div>
                  )}
@@ -70,7 +70,7 @@ const ReverseDictionaryView: React.FC = () => {
                         animate={{ opacity: 1 }}
                         className="space-y-3 mt-4"
                     >
-                        <h2 className="text-xl font-title font-bold text-slate-800">Suggestions:</h2>
+                        <h2 className="text-xl font-title font-bold text-neutral">Suggestions:</h2>
                         {results.map((word, index) => (
                             <motion.div
                                 key={word}

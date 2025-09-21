@@ -79,7 +79,7 @@ const WordScrambleGame: React.FC<WordScrambleGameProps> = ({ vocabulary, onFinis
   if (words.length === 0) {
     return (
         <div className="text-center p-8 bg-base-100 rounded-lg shadow-md">
-            <p className="text-slate-700">Not enough words to start the game.</p>
+            <p className="text-neutral-content">Not enough words to start the game.</p>
             <button onClick={onFinish} className="mt-4 bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-primary-focus transition-colors">
                 Back to Practice
             </button>
@@ -91,7 +91,7 @@ const WordScrambleGame: React.FC<WordScrambleGameProps> = ({ vocabulary, onFinis
     return (
       <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center p-8 bg-base-100 rounded-lg shadow-xl animate-fade-in">
         <h2 className="text-3xl font-title font-bold text-primary mb-4">Game Over!</h2>
-        <p className="text-xl text-slate-800 mb-2">You scored</p>
+        <p className="text-xl text-neutral mb-2">You scored</p>
         <p className="text-5xl font-extrabold text-secondary mb-6">{score} / {words.length}</p>
         <StarRating score={score} total={words.length} />
         <button onClick={onFinish} className="mt-8 w-full bg-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-primary-focus transition-colors text-lg">
@@ -105,7 +105,7 @@ const WordScrambleGame: React.FC<WordScrambleGameProps> = ({ vocabulary, onFinis
     <div className="w-full">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-2xl font-title font-bold text-accent">Word Scramble</h2>
-        <p className="font-semibold text-slate-600">{currentIndex + 1} / {words.length}</p>
+        <p className="font-semibold text-neutral-content">{currentIndex + 1} / {words.length}</p>
       </div>
       <div className="bg-base-100 p-6 rounded-lg shadow-md">
         <AnimatePresence mode="wait">
@@ -117,9 +117,9 @@ const WordScrambleGame: React.FC<WordScrambleGameProps> = ({ vocabulary, onFinis
             transition={{ duration: 0.3 }}
             className="text-center"
           >
-            <p className="text-slate-600 mb-2">Unscramble the letters:</p>
+            <p className="text-neutral-content mb-2">Unscramble the letters:</p>
             <p className="text-4xl font-bold tracking-widest text-primary mb-6 bg-primary/10 py-4 rounded-lg">{scrambledWord}</p>
-            <p className="text-slate-700 font-medium">{currentWord.definition}</p>
+            <p className="text-neutral-content font-medium">{currentWord.definition}</p>
           </motion.div>
         </AnimatePresence>
 

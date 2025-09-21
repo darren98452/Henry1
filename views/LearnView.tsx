@@ -42,14 +42,14 @@ const LearnView: React.FC<LearnViewProps> = ({ vocabulary }) => {
       <div className="text-center p-8 flex flex-col items-center justify-center h-[calc(100vh-112px)]">
         <Mascot message="You're a vocabulary superstar! You've learned everything for now." />
         <h2 className="text-2xl font-bold text-success mt-4 mb-2">Congratulations!</h2>
-        <p className="text-slate-600">Check back later for more words.</p>
+        <p className="text-neutral-content">Check back later for more words.</p>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col h-[calc(100vh-112px)]">
-      <h1 className="flex-shrink-0 text-2xl font-title font-bold text-slate-900 mb-4 text-center">Learn New Words</h1>
+      <h1 className="flex-shrink-0 text-2xl font-title font-bold text-neutral mb-4 text-center">Learn New Words</h1>
       <div className="flex-grow flex flex-col items-center justify-center">
          <AnimatePresence mode="wait">
             <motion.div
@@ -74,7 +74,7 @@ const LearnView: React.FC<LearnViewProps> = ({ vocabulary }) => {
             <button onClick={handlePrev} disabled={currentIndex === 0} className="p-3 rounded-full bg-base-100 shadow-md disabled:opacity-50">
             <ArrowLeft className="text-primary" />
             </button>
-            <p className="mx-6 font-semibold text-neutral-600">{currentIndex + 1} / {wordsToLearn.length}</p>
+            <p className="mx-6 font-semibold text-neutral-content">{currentIndex + 1} / {wordsToLearn.length}</p>
             <button onClick={handleNext} disabled={currentIndex === wordsToLearn.length - 1} className="p-3 rounded-full bg-base-100 shadow-md disabled:opacity-50">
             <ArrowRight className="text-primary" />
             </button>

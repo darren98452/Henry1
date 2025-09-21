@@ -84,7 +84,7 @@ const Mascot: React.FC<MascotProps> = ({ message, size = 'md' }) => {
           animate={{ opacity: 1, y: 0 }}
           className="relative bg-base-100 p-3 rounded-lg shadow-md max-w-xs text-center mb-2"
         >
-          <p className="text-sm text-slate-700">{message}</p>
+          <p className="text-sm text-neutral-content">{message}</p>
           {/* Speech bubble tail */}
           <div className="absolute bottom-[-10px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[10px] border-t-base-100"></div>
         </motion.div>

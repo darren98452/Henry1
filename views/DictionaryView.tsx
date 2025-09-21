@@ -48,8 +48,8 @@ const DictionaryView: React.FC<DictionaryViewProps> = ({ onBack }) => {
                     <ArrowLeft size={20} />
                     <span>Back to Home</span>
                 </button>
-                <h1 className="text-3xl font-title font-bold text-slate-900">Dictionary</h1>
-                <p className="text-slate-600 mt-1">Look up any word.</p>
+                <h1 className="text-3xl font-title font-bold text-neutral">Dictionary</h1>
+                <p className="text-neutral-content mt-1">Look up any word.</p>
             </motion.div>
 
             <form onSubmit={handleSubmit} className="flex space-x-2">
@@ -114,7 +114,7 @@ const DictionaryView: React.FC<DictionaryViewProps> = ({ onBack }) => {
                 )}
                 </AnimatePresence>
                  {!isLoading && !result && !searched && (
-                    <div className="text-center p-8 text-slate-500">
+                    <div className="text-center p-8 text-neutral-content">
                        <Mascot message="I can help you find definitions for any word. Just type it above!" />
                     </div>
                  )}

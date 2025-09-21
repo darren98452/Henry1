@@ -27,9 +27,9 @@ const DiamondMedal: React.FC<{ className?: string }> = ({ className }) => React.
 
 
 export const RANKS: Rank[] = [
-  { name: 'Copper', icon: CopperMedal, minWords: 50 },
-  { name: 'Bronze', icon: BronzeMedal, minWords: 100 },
-  { name: 'Silver', icon: SilverMedal, minWords: 150 },
+  { name: 'Copper', icon: CopperMedal, minWords: 0 },
+  { name: 'Bronze', icon: BronzeMedal, minWords: 50 },
+  { name: 'Silver', icon: SilverMedal, minWords: 100 },
   { name: 'Gold', icon: GoldMedal, minWords: 200 },
   { name: 'Platinum', icon: PlatinumMedal, minWords: 300 },
   { name: 'Diamond', icon: DiamondMedal, minWords: 500 },
@@ -96,28 +96,28 @@ export const INITIAL_WORDS: Word[] = [
 
 export const MOCK_USERS: User[] = [
   // Diamond League
-  { id: 20, name: 'Zephyr', avatarUrl: 'https://picsum.photos/seed/user20/48/48', wordsLearned: 175 },
+  { id: 20, name: 'Zephyr', avatarUrl: 'https://picsum.photos/seed/user20/48/48', wordsLearned: 575 },
 
   // Platinum League
-  { id: 1, name: 'Alex', avatarUrl: 'https://picsum.photos/seed/user1/48/48', wordsLearned: 142 },
-  { id: 2, name: 'Lexi', avatarUrl: 'https://picsum.photos/seed/user2/48/48', wordsLearned: 121 },
-  { id: 3, name: 'Chris', avatarUrl: 'https://picsum.photos/seed/user3/48/48', wordsLearned: 105 },
+  { id: 1, name: 'Alex', avatarUrl: 'https://picsum.photos/seed/user1/48/48', wordsLearned: 342 },
+  { id: 2, name: 'Lexi', avatarUrl: 'https://picsum.photos/seed/user2/48/48', wordsLearned: 421 },
+  { id: 3, name: 'Chris', avatarUrl: 'https://picsum.photos/seed/user3/48/48', wordsLearned: 305 },
 
   // Gold League
-  { id: 4, name: 'Jordan', avatarUrl: 'https://picsum.photos/seed/user4/48/48', wordsLearned: 98 },
-  { id: 5, name: 'Taylor', avatarUrl: 'https://picsum.photos/seed/user5/48/48', wordsLearned: 85 },
-  { id: 6, name: 'Sam', avatarUrl: 'https://picsum.photos/seed/user6/48/48', wordsLearned: 72 },
-  { id: 7, name: 'Casey', avatarUrl: 'https://picsum.photos/seed/user7/48/48', wordsLearned: 63 },
+  { id: 4, name: 'Jordan', avatarUrl: 'https://picsum.photos/seed/user4/48/48', wordsLearned: 298 },
+  { id: 5, name: 'Taylor', avatarUrl: 'https://picsum.photos/seed/user5/48/48', wordsLearned: 285 },
+  { id: 6, name: 'Sam', avatarUrl: 'https://picsum.photos/seed/user6/48/48', wordsLearned: 272 },
+  { id: 7, name: 'Casey', avatarUrl: 'https://picsum.photos/seed/user7/48/48', wordsLearned: 263 },
   
   // Silver League
-  { id: 9, name: 'Riley', avatarUrl: 'https://picsum.photos/seed/user9/48/48', wordsLearned: 55 },
-  { id: 10, name: 'Dana', avatarUrl: 'https://picsum.photos/seed/user10/48/48', wordsLearned: 42 },
-  { id: 12, name: 'Jessie', avatarUrl: 'https://picsum.photos/seed/user12/48/48', wordsLearned: 38 },
+  { id: 9, name: 'Riley', avatarUrl: 'https://picsum.photos/seed/user9/48/48', wordsLearned: 155 },
+  { id: 10, name: 'Dana', avatarUrl: 'https://picsum.photos/seed/user10/48/48', wordsLearned: 142 },
+  { id: 12, name: 'Jessie', avatarUrl: 'https://picsum.photos/seed/user12/48/48', wordsLearned: 138 },
   
   // Bronze League
-  { id: 13, name: 'Pat', avatarUrl: 'https://picsum.photos/seed/user13/48/48', wordsLearned: 26 },
-  { id: 14, name: 'Robin', avatarUrl: 'https://picsum.photos/seed/user14/48/48', wordsLearned: 24 },
-  { id: 15, name: 'Quinn', avatarUrl: 'https://picsum.photos/seed/user15/48/48', wordsLearned: 17 },
+  { id: 13, name: 'Pat', avatarUrl: 'https://picsum.photos/seed/user13/48/48', wordsLearned: 76 },
+  { id: 14, name: 'Robin', avatarUrl: 'https://picsum.photos/seed/user14/48/48', wordsLearned: 64 },
+  { id: 15, name: 'Quinn', avatarUrl: 'https://picsum.photos/seed/user15/48/48', wordsLearned: 57 },
 
   // Copper League
   { id: 16, name: 'Finley', avatarUrl: 'https://picsum.photos/seed/user16/48/48', wordsLearned: 9 },
