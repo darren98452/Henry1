@@ -1,48 +1,37 @@
-
-import { useState, useMemo, useEffect } from 'react';
-import type { Word, UserProgress, Rank, SrsData } from '../types';
-import { INITIAL_WORDS, RANKS } from '../constants';
-
-const VOCAB_STORAGE_KEY = 'vocab-ai-trainer-vocabulary';
-
-const createInitialSrsData = (date: Date = new Date()): SrsData => {
-    const tomorrow = new Date(date);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return {
-        lastReviewed: date.toISOString(),
-        nextReview: tomorrow.toISOString(),
-        interval: 1,
-        easeFactor: 2.5,
-        repetition: 0,
-    };
-};
-
+import { useMemo, useContext } from 'react';
+import type { UserProgress } from '../types';
+import { RANKS } from '../constants';
+import { UserContext } from '../contexts/UserContext';
 
 export const useVocabulary = () => {
-    const [words, setWords] = useState<Word[]>(() => {
-        try {
-            const storedWords = localStorage.getItem(VOCAB_STORAGE_KEY);
-            if (storedWords) {
-                // Basic validation, could be more robust
-                const parsed = JSON.parse(storedWords);
-                if (Array.isArray(parsed) && parsed.length > 0) {
-                    return parsed;
-                }
-            }
-        } catch (error) {
-            console.error("Failed to parse vocabulary from localStorage", error);
-        }
-        return INITIAL_WORDS;
-    });
+    const { userData, recordQuizResult, toggleBookmark, fetchNewWords, isLoading, error } = useContext(UserContext);
 
-    const [bookmarkedWords, setBookmarkedWords] = useState<Set<string>>(new Set(['Serendipity']));
-    const [totalCorrect, setTotalCorrect] = useState(15);
-    const [totalAnswered, setTotalAnswered] = useState(18);
+    // If data is not yet loaded, return a default/empty state to prevent errors in components
+    if (!userData) {
+        return {
+            allWords: [],
+            wordsToLearn: [],
+            learnedWords: new Set(),
+            learnedWordsList: [],
+            wordsToReview: [],
+            bookmarkedWords: new Set(),
+            bookmarkedWordsList: [],
+            progress: {
+                wordsLearned: 0,
+                accuracy: 0,
+                rank: RANKS[0],
+            },
+            toggleBookmark: async () => {},
+            recordQuizResult: async () => {},
+            fetchNewWords: async () => {},
+            isLoading,
+            error,
+        };
+    }
 
-    useEffect(() => {
-        localStorage.setItem(VOCAB_STORAGE_KEY, JSON.stringify(words));
-    }, [words]);
-
+    const { words, bookmarkedWords: bookmarkedWordStrings, quizStats } = userData;
+    const bookmarkedWords = useMemo(() => new Set(bookmarkedWordStrings), [bookmarkedWordStrings]);
+    
     const learnedWordsList = useMemo(() => words.filter(w => w.srsData), [words]);
     const learnedWords = useMemo(() => new Set(learnedWordsList.map(w => w.word)), [learnedWordsList]);
     
@@ -57,81 +46,9 @@ export const useVocabulary = () => {
         return words.filter(word => bookmarkedWords.has(word.word));
     }, [words, bookmarkedWords]);
 
-    const updateWord = (wordIdentifier: string, newWordData: Partial<Word>) => {
-        setWords(prevWords => prevWords.map(w => 
-            w.word === wordIdentifier ? { ...w, ...newWordData } : w
-        ));
-    };
-
-    const markAsLearned = (wordIdentifier: string) => {
-        const word = words.find(w => w.word === wordIdentifier);
-        if (word && !word.srsData) {
-            updateWord(wordIdentifier, { srsData: createInitialSrsData() });
-        }
-    };
-    
-    const recordQuizResult = (wordIdentifier: string, isCorrect: boolean) => {
-        setTotalAnswered(prev => prev + 1);
-        if (isCorrect) {
-            setTotalCorrect(prev => prev + 1);
-        }
-
-        const word = words.find(w => w.word === wordIdentifier);
-        if (!word) return;
-
-        let currentSrs = word.srsData;
-
-        // If the word has never been reviewed, initialize its SRS data
-        if (!currentSrs) {
-            currentSrs = createInitialSrsData();
-        } else {
-            currentSrs = { ...currentSrs }; // create a copy to modify
-        }
-        
-        currentSrs.lastReviewed = new Date().toISOString();
-
-        if (isCorrect) {
-            // Correct answer: increase interval based on SM-2 logic
-            currentSrs.repetition += 1;
-            
-            if (currentSrs.repetition === 1) {
-                currentSrs.interval = 1;
-            } else if (currentSrs.repetition === 2) {
-                currentSrs.interval = 6;
-            } else {
-                currentSrs.interval = Math.ceil(currentSrs.interval * currentSrs.easeFactor);
-            }
-            // Adjust ease factor slightly
-            currentSrs.easeFactor = Math.max(1.3, currentSrs.easeFactor + 0.1);
-        } else {
-            // Incorrect answer: reset progress
-            currentSrs.repetition = 0;
-            currentSrs.interval = 1;
-            // Penalize ease factor
-            currentSrs.easeFactor = Math.max(1.3, currentSrs.easeFactor - 0.2);
-        }
-
-        const nextReviewDate = new Date();
-        nextReviewDate.setDate(nextReviewDate.getDate() + currentSrs.interval);
-        currentSrs.nextReview = nextReviewDate.toISOString();
-
-        updateWord(wordIdentifier, { srsData: currentSrs });
-    };
-
-    const toggleBookmark = (wordIdentifier: string) => {
-        setBookmarkedWords(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(wordIdentifier)) {
-                newSet.delete(wordIdentifier);
-            } else {
-                newSet.add(wordIdentifier);
-            }
-            return newSet;
-        });
-    };
 
     const progress: UserProgress = useMemo(() => {
-        const accuracy = totalAnswered > 0 ? Math.round((totalCorrect / totalAnswered) * 100) : 0;
+        const accuracy = quizStats.totalAnswered > 0 ? Math.round((quizStats.totalCorrect / quizStats.totalAnswered) * 100) : 0;
         const wordsLearnedCount = learnedWords.size;
         const currentRank = [...RANKS].reverse().find(rank => wordsLearnedCount >= rank.minWords) || RANKS[0];
         return {
@@ -139,7 +56,7 @@ export const useVocabulary = () => {
             accuracy,
             rank: currentRank,
         };
-    }, [learnedWords.size, totalCorrect, totalAnswered]);
+    }, [learnedWords.size, quizStats]);
 
 
     return {
@@ -151,9 +68,11 @@ export const useVocabulary = () => {
         bookmarkedWords,
         bookmarkedWordsList,
         progress,
-        markAsLearned,
         toggleBookmark,
-        recordQuizResult
+        recordQuizResult,
+        fetchNewWords,
+        isLoading,
+        error,
     };
 };
 

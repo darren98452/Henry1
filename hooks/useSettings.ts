@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useContext } from 'react';
+import { UserContext } from '../contexts/UserContext';
 
 export const themes = {
   lavender: {
@@ -190,57 +191,27 @@ export interface Settings {
   userName: string;
 }
 
-const SETTINGS_STORAGE_KEY = 'vocab-ai-trainer-settings';
-
 const defaultSettings: Settings = {
   theme: 'lavender',
   userName: 'Learner',
 };
 
 export const useSettings = () => {
-  const [settings, setSettings] = useState<Settings>(() => {
-    try {
-      const storedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
-      if (storedSettings) {
-        const parsed = JSON.parse(storedSettings);
-        if (parsed.theme && parsed.userName) {
-          return {
-            theme: parsed.theme,
-            userName: parsed.userName,
-          };
+    const { userData, setTheme, setUserName } = useContext(UserContext);
+    const settings = userData?.settings || defaultSettings;
+
+    useEffect(() => {
+        const theme = themes[settings.theme] || themes.lavender;
+        for (const [key, value] of Object.entries(theme)) {
+        document.documentElement.style.setProperty(`--color-${key}`, String(value));
         }
-      }
-    } catch (error) {
-      console.error("Failed to parse settings from localStorage", error);
-    }
-    return defaultSettings;
-  });
+    }, [settings.theme]);
 
-  useEffect(() => {
-    // Apply theme colors
-    const theme = themes[settings.theme] || themes.lavender;
-    for (const [key, value] of Object.entries(theme)) {
-      document.documentElement.style.setProperty(`--color-${key}`, value);
-    }
-  }, [settings.theme]);
-
-  useEffect(() => {
-    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
-  }, [settings]);
-
-  const setTheme = useCallback((theme: ThemeName) => {
-    setSettings(s => ({ ...s, theme }));
-  }, []);
-
-  const setUserName = useCallback((name: string) => {
-      setSettings(s => ({...s, userName: name}));
-  }, []);
-
-  return {
-    settings,
-    setTheme,
-    setUserName,
-  };
+    return {
+        settings,
+        setTheme,
+        setUserName,
+    };
 };
 
 export type UseSettingsReturn = ReturnType<typeof useSettings>;

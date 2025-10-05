@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { generateQuizQuestion } from '../services/geminiService';
-import type { QuizQuestion, Word } from '../types';
+import api from '../services/apiService';
+import type { QuizQuestion, Word, PracticeSession } from '../types';
 import type { UseVocabularyReturn } from '../hooks/useVocabulary';
 import Loader from './Loader';
 import StarRating from './StarRating';
@@ -9,42 +9,38 @@ import StarRating from './StarRating';
 interface QuizProps {
   vocabulary: UseVocabularyReturn;
   onFinish: () => void;
+  addPracticeSession: (sessionData: Omit<PracticeSession, 'id' | 'date'>) => void;
 }
 
 const QUIZ_LENGTH = 5;
 
-const Quiz: React.FC<QuizProps> = ({ vocabulary, onFinish }) => {
+const Quiz: React.FC<QuizProps> = ({ vocabulary, onFinish, addPracticeSession }) => {
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [score, setScore] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFinished, setIsFinished] = useState(false);
 
   const fetchQuestions = useCallback(async () => {
     setIsLoading(true);
-    // Prioritize words due for review
     let wordsForQuiz = [...vocabulary.wordsToReview];
     
-    // If not enough words to review, add some other learned words
     if (wordsForQuiz.length < QUIZ_LENGTH) {
         const otherLearnedWords = vocabulary.learnedWordsList
-            .filter(w => !wordsForQuiz.some(reviewWord => reviewWord.word === w.word)) // Exclude words already in the review list
-            .sort(() => 0.5 - Math.random()); // Shuffle
-        
+            .filter(w => !wordsForQuiz.some(reviewWord => reviewWord.word === w.word))
+            .sort(() => 0.5 - Math.random());
         wordsForQuiz.push(...otherLearnedWords.slice(0, QUIZ_LENGTH - wordsForQuiz.length));
     }
 
-    // If still not enough, add any word (for new users)
     if (wordsForQuiz.length < QUIZ_LENGTH) {
         const anyOtherWords = vocabulary.allWords
-            .filter(w => !wordsForQuiz.some(quizWord => quizWord.word === w.word)) // Exclude all words already selected
+            .filter(w => !wordsForQuiz.some(quizWord => quizWord.word === w.word))
             .sort(() => 0.5 - Math.random());
-        
         wordsForQuiz.push(...anyOtherWords.slice(0, QUIZ_LENGTH - wordsForQuiz.length));
     }
     
-    // Ensure we don't exceed quiz length and handle case where there are no words
     wordsForQuiz = wordsForQuiz.slice(0, QUIZ_LENGTH);
     if (wordsForQuiz.length === 0) {
         setIsLoading(false);
@@ -52,11 +48,15 @@ const Quiz: React.FC<QuizProps> = ({ vocabulary, onFinish }) => {
         return;
     }
 
-    const generatedQuestions = await Promise.all(
-        wordsForQuiz.map(word => generateQuizQuestion(word))
-    );
-    setQuestions(generatedQuestions);
-    setIsLoading(false);
+    try {
+        const generatedQuestions = await api.generateQuiz(wordsForQuiz);
+        setQuestions(generatedQuestions);
+    } catch (error) {
+        console.error("Failed to generate quiz from API", error);
+        setQuestions([]); // Set to empty on error to show message
+    } finally {
+        setIsLoading(false);
+    }
   }, [vocabulary.wordsToReview, vocabulary.learnedWordsList, vocabulary.allWords]);
 
   useEffect(() => {
@@ -72,8 +72,8 @@ const Quiz: React.FC<QuizProps> = ({ vocabulary, onFinish }) => {
     setSelectedAnswer(option);
     setIsAnswered(true);
 
-    // Report result to the SRS hook
-    vocabulary.recordQuizResult(currentQuestion.word, isCorrect);
+    const quality = isCorrect ? 4 : 0;
+    vocabulary.recordQuizResult(currentQuestion.word, quality);
     
     if (isCorrect) {
       setScore(s => s + 1);
@@ -86,6 +86,19 @@ const Quiz: React.FC<QuizProps> = ({ vocabulary, onFinish }) => {
     setCurrentQuestionIndex(i => i + 1);
   };
   
+  const isQuizComplete = currentQuestionIndex >= questions.length;
+
+  useEffect(() => {
+    if (isQuizComplete && !isFinished && questions.length > 0) {
+        addPracticeSession({
+            type: 'Quiz',
+            score: score,
+            total: questions.length
+        });
+        setIsFinished(true);
+    }
+  }, [isQuizComplete, questions.length, score, addPracticeSession, isFinished]);
+
   if (isLoading) {
     return <Loader message="Preparing your quiz..." />;
   }
@@ -101,7 +114,7 @@ const Quiz: React.FC<QuizProps> = ({ vocabulary, onFinish }) => {
       );
   }
 
-  if (currentQuestionIndex >= questions.length) { // Use questions.length instead of QUIZ_LENGTH
+  if (isQuizComplete) {
     return (
       <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center p-8 bg-base-100 rounded-lg shadow-xl animate-fade-in">
         <h2 className="text-3xl font-title font-bold text-primary mb-4">Quiz Complete!</h2>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { Word } from '../types';
+import type { Word, PracticeSession } from '../types';
 import type { UseVocabularyReturn } from '../hooks/useVocabulary';
 import Loader from './Loader';
 import StarRating from './StarRating';
@@ -8,6 +8,7 @@ import StarRating from './StarRating';
 interface WordScrambleGameProps {
   vocabulary: UseVocabularyReturn;
   onFinish: () => void;
+  addPracticeSession: (sessionData: Omit<PracticeSession, 'id' | 'date'>) => void;
 }
 
 const GAME_LENGTH = 5;
@@ -22,13 +23,14 @@ const scrambleWord = (word: string): string => {
 };
 
 
-const WordScrambleGame: React.FC<WordScrambleGameProps> = ({ vocabulary, onFinish }) => {
+const WordScrambleGame: React.FC<WordScrambleGameProps> = ({ vocabulary, onFinish, addPracticeSession }) => {
   const [words, setWords] = useState<Word[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userInput, setUserInput] = useState('');
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
   const [score, setScore] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFinished, setIsFinished] = useState(false);
 
   const fetchWords = useCallback(() => {
     setIsLoading(true);
@@ -55,11 +57,11 @@ const WordScrambleGame: React.FC<WordScrambleGameProps> = ({ vocabulary, onFinis
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (feedback) return;
+    if (feedback || !currentWord) return;
 
     const isCorrect = userInput.trim().toLowerCase() === currentWord.word.toLowerCase();
     setFeedback(isCorrect ? 'correct' : 'incorrect');
-    vocabulary.recordQuizResult(currentWord.word, isCorrect);
+    vocabulary.recordQuizResult(currentWord.word, isCorrect ? 4 : 1);
 
     if (isCorrect) {
       setScore(s => s + 1);
@@ -71,6 +73,20 @@ const WordScrambleGame: React.FC<WordScrambleGameProps> = ({ vocabulary, onFinis
     setUserInput('');
     setCurrentIndex(i => i + 1);
   };
+  
+  const isGameOver = currentIndex >= words.length;
+
+  useEffect(() => {
+    if (isGameOver && !isFinished && words.length > 0) {
+        addPracticeSession({
+            type: 'Word Scramble',
+            score: score,
+            total: words.length
+        });
+        setIsFinished(true);
+    }
+  }, [isGameOver, words.length, score, addPracticeSession, isFinished]);
+
 
   if (isLoading) {
     return <Loader message="Scrambling words..." />;
@@ -87,7 +103,7 @@ const WordScrambleGame: React.FC<WordScrambleGameProps> = ({ vocabulary, onFinis
     );
   }
 
-  if (currentIndex >= words.length) {
+  if (isGameOver) {
     return (
       <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center p-8 bg-base-100 rounded-lg shadow-xl animate-fade-in">
         <h2 className="text-3xl font-title font-bold text-primary mb-4">Game Over!</h2>

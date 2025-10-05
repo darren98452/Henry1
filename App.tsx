@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, BookOpen, Sparkles, Search, User } from 'lucide-react';
+import { Home, BookOpen, Sparkles, Search, User, AlertTriangle } from 'lucide-react';
 import HomeView from './views/HomeView';
 import LearnView from './views/LearnView';
 import PracticeView from './views/PracticeView';
@@ -12,6 +12,9 @@ import type { NavItem } from './types';
 import { useVocabulary } from './hooks/useVocabulary';
 import { useSettings } from './hooks/useSettings';
 import { useSocial } from './hooks/useSocial';
+import { usePracticeHistory } from './hooks/usePracticeHistory';
+import { UserContext } from './contexts/UserContext';
+import FullScreenLoader from './components/FullScreenLoader';
 
 const navItems: NavItem[] = [
   { id: 'home', label: 'Home', icon: Home },
@@ -21,10 +24,11 @@ const navItems: NavItem[] = [
   { id: 'profile', label: 'Profile', icon: User },
 ];
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const vocabulary = useVocabulary();
   const settingsHook = useSettings();
   const socialHook = useSocial();
+  const practiceHistoryHook = usePracticeHistory();
   const [activeView, setActiveView] = useState('home');
   const [isDictionaryOpen, setIsDictionaryOpen] = useState(false);
 
@@ -44,11 +48,11 @@ const App: React.FC = () => {
       case 'learn':
         return <LearnView vocabulary={vocabulary} />;
       case 'practice':
-        return <PracticeView vocabulary={vocabulary} />;
+        return <PracticeView vocabulary={vocabulary} addPracticeSession={practiceHistoryHook.addPracticeSession} />;
       case 'search':
         return <ReverseDictionaryView />;
       case 'profile':
-        return <ProfileView vocabulary={vocabulary} settingsHook={settingsHook} socialHook={socialHook} />;
+        return <ProfileView vocabulary={vocabulary} settingsHook={settingsHook} socialHook={socialHook} practiceHistoryHook={practiceHistoryHook} />;
       default:
         return <HomeView vocabulary={vocabulary} onNavigateToDictionary={() => setIsDictionaryOpen(true)} onNavigateToPractice={() => setActiveView('practice')} userName={settingsHook.settings.userName} />;
     }
@@ -104,5 +108,25 @@ const App: React.FC = () => {
     </div>
   );
 };
+
+const App: React.FC = () => {
+    const { isLoading, error } = useContext(UserContext);
+
+    if (isLoading) {
+        return <FullScreenLoader />;
+    }
+    
+    if (error) {
+        return (
+            <div className="fixed inset-0 bg-base-200 flex flex-col items-center justify-center text-center p-4">
+                <AlertTriangle className="w-16 h-16 text-error mb-4" />
+                <h1 className="text-2xl font-bold text-neutral mb-2">Oops! Something went wrong.</h1>
+                <p className="text-neutral-content">{error}</p>
+            </div>
+        );
+    }
+    
+    return <AppContent />;
+}
 
 export default App;

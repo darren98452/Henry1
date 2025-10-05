@@ -3,10 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { UseVocabularyReturn } from '../hooks/useVocabulary';
 import type { UseSettingsReturn } from '../hooks/useSettings';
 import type { UseSocialReturn } from '../hooks/useSocial';
+import type { UsePracticeHistoryReturn } from '../hooks/usePracticeHistory';
 import SettingsView from './SettingsView';
+import HistoryView from './HistoryView';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 import type { Word, User as UserType } from '../types';
-import { BookCopy, Target, User, Settings, Award, X, UserPlus, UserMinus } from 'lucide-react';
+import { BookCopy, Target, User, Settings, Award, X, UserPlus, UserMinus, BookCheck } from 'lucide-react';
 import Mascot from '../components/Mascot';
 import { MOCK_USERS, RANKS } from '../constants';
 
@@ -14,6 +16,7 @@ interface ProfileViewProps {
   vocabulary: UseVocabularyReturn;
   settingsHook: UseSettingsReturn;
   socialHook: UseSocialReturn;
+  practiceHistoryHook: UsePracticeHistoryReturn;
 }
 
 const progressData = [
@@ -39,12 +42,12 @@ const TabButton: React.FC<{ label: string; icon: React.ReactNode; isActive: bool
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center justify-center space-x-2 font-semibold py-2 rounded-full transition-colors duration-300 ${
+      className={`w-full flex flex-col sm:flex-row items-center justify-center space-x-0 sm:space-x-2 font-semibold py-2 rounded-full transition-colors duration-300 ${
         isActive ? 'bg-primary text-white shadow' : 'text-neutral-content hover:bg-base-200'
       }`}
     >
         {icon}
-        <span>{label}</span>
+        <span className="text-xs sm:text-sm mt-1 sm:mt-0">{label}</span>
     </button>
   );
 };
@@ -277,8 +280,8 @@ const ProfileContent: React.FC<{ vocabulary: UseVocabularyReturn, settingsHook: 
     )
 }
 
-const ProfileView: React.FC<ProfileViewProps> = ({ vocabulary, settingsHook, socialHook }) => {
-    const [activeTab, setActiveTab] = useState<'profile' | 'settings'>('profile');
+const ProfileView: React.FC<ProfileViewProps> = ({ vocabulary, settingsHook, socialHook, practiceHistoryHook }) => {
+    const [activeTab, setActiveTab] = useState<'profile' | 'history' | 'settings'>('profile');
 
     return (
         <div className="space-y-6">
@@ -286,12 +289,18 @@ const ProfileView: React.FC<ProfileViewProps> = ({ vocabulary, settingsHook, soc
                 <h1 className="text-3xl font-title font-bold text-neutral">Profile</h1>
             </div>
             
-            <div className="flex bg-base-100 p-1 rounded-full shadow-inner">
+            <div className="flex bg-base-100 p-1 rounded-full shadow-inner space-x-1">
                 <TabButton
                     label="Overview"
                     icon={<User size={18}/>}
                     isActive={activeTab === 'profile'}
                     onClick={() => setActiveTab('profile')}
+                />
+                 <TabButton
+                    label="History"
+                    icon={<BookCheck size={18}/>}
+                    isActive={activeTab === 'history'}
+                    onClick={() => setActiveTab('history')}
                 />
                 <TabButton
                     label="Settings"
@@ -311,6 +320,8 @@ const ProfileView: React.FC<ProfileViewProps> = ({ vocabulary, settingsHook, soc
                 >
                     {activeTab === 'profile' ? (
                         <ProfileContent vocabulary={vocabulary} settingsHook={settingsHook} socialHook={socialHook} />
+                    ) : activeTab === 'history' ? (
+                        <HistoryView practiceHistoryHook={practiceHistoryHook} />
                     ) : (
                         <SettingsView settingsHook={settingsHook} />
                     )}

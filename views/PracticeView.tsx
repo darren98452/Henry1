@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { UseVocabularyReturn } from '../hooks/useVocabulary';
+import type { PracticeSession } from '../types';
 import Quiz from '../components/Quiz';
 import SwipeGame from '../components/SwipeGame';
 import WordScrambleGame from '../components/WordScrambleGame';
@@ -10,6 +11,7 @@ import { Brain, Gamepad2, ArrowLeft, Shuffle, Ear, Puzzle } from 'lucide-react';
 
 interface PracticeViewProps {
   vocabulary: UseVocabularyReturn;
+  addPracticeSession: (sessionData: Omit<PracticeSession, 'id' | 'date'>) => void;
 }
 
 type PracticeMode = 'menu' | 'quiz' | 'swipe' | 'scramble' | 'spelling' | 'wordle';
@@ -39,21 +41,21 @@ const PracticeCard: React.FC<{title: string, description: string, icon: React.Re
     );
 };
 
-const PracticeView: React.FC<PracticeViewProps> = ({ vocabulary }) => {
+const PracticeView: React.FC<PracticeViewProps> = ({ vocabulary, addPracticeSession }) => {
   const [mode, setMode] = useState<PracticeMode>('menu');
 
   const renderContent = () => {
     switch (mode) {
       case 'quiz':
-        return <Quiz vocabulary={vocabulary} onFinish={() => setMode('menu')} />;
+        return <Quiz vocabulary={vocabulary} onFinish={() => setMode('menu')} addPracticeSession={addPracticeSession} />;
       case 'swipe':
-        return <SwipeGame onFinish={() => setMode('menu')} />;
+        return <SwipeGame onFinish={() => setMode('menu')} addPracticeSession={addPracticeSession} />;
       case 'scramble':
-        return <WordScrambleGame vocabulary={vocabulary} onFinish={() => setMode('menu')} />;
+        return <WordScrambleGame vocabulary={vocabulary} onFinish={() => setMode('menu')} addPracticeSession={addPracticeSession} />;
       case 'spelling':
-        return <SpellingBeeGame vocabulary={vocabulary} onFinish={() => setMode('menu')} />;
+        return <SpellingBeeGame vocabulary={vocabulary} onFinish={() => setMode('menu')} addPracticeSession={addPracticeSession} />;
       case 'wordle':
-        return <WordleGame vocabulary={vocabulary} onFinish={() => setMode('menu')} />;
+        return <WordleGame vocabulary={vocabulary} onFinish={() => setMode('menu')} addPracticeSession={addPracticeSession} />;
       case 'menu':
       default:
         return (

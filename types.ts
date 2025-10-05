@@ -1,5 +1,8 @@
 import type { LucideProps } from 'lucide-react';
 import type React from 'react';
+// FIX: Import the `Settings` type so it is available within this module, then re-export it.
+import type { Settings } from './hooks/useSettings';
+export type { Settings };
 
 export interface SrsData {
   lastReviewed: string; // ISO date string
@@ -57,4 +60,24 @@ export interface User {
   avatarUrl: string;
   wordsLearned: number;
   isCurrentUser?: boolean;
+}
+
+export interface PracticeSession {
+  id: string;
+  type: 'Quiz' | 'Synonym Swipe' | 'Word Scramble' | 'Spelling Bee' | 'Wordle';
+  score: number;
+  total: number;
+  date: string; // ISO date string
+}
+
+export interface UserData {
+  words: Word[];
+  bookmarkedWords: string[];
+  quizStats: {
+    totalCorrect: number;
+    totalAnswered: number;
+  };
+  settings: Settings;
+  friendIds: number[];
+  practiceHistory: PracticeSession[];
 }

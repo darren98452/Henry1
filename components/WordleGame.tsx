@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { UseVocabularyReturn } from '../hooks/useVocabulary';
-// FIX: Import the `Loader` component to resolve a 'Cannot find name' error.
+import type { PracticeSession } from '../types';
 import Loader from './Loader';
 
 interface WordleGameProps {
   vocabulary: UseVocabularyReturn;
   onFinish: () => void;
+  addPracticeSession: (sessionData: Omit<PracticeSession, 'id' | 'date'>) => void;
 }
 
 const WORD_LENGTH = 5;
@@ -51,13 +52,14 @@ const Keyboard: React.FC<{ onKeyPress: (key: string) => void; keyStatuses: { [ke
     );
 };
 
-const WordleGame: React.FC<WordleGameProps> = ({ vocabulary, onFinish }) => {
+const WordleGame: React.FC<WordleGameProps> = ({ vocabulary, onFinish, addPracticeSession }) => {
     const [secretWord, setSecretWord] = useState<string | null>(null);
     const [guesses, setGuesses] = useState<string[]>(Array(MAX_GUESSES).fill(''));
     const [currentGuessIndex, setCurrentGuessIndex] = useState(0);
     const [gameState, setGameState] = useState<GameState>('playing');
     const [keyStatuses, setKeyStatuses] = useState<{ [key: string]: LetterStatus }>({});
     const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+    const [isFinished, setIsFinished] = useState(false);
 
     useEffect(() => {
         const fiveLetterWords = vocabulary.allWords.filter(w => w.word.length === WORD_LENGTH && /^[a-zA-Z]+$/.test(w.word));
@@ -82,10 +84,10 @@ const WordleGame: React.FC<WordleGameProps> = ({ vocabulary, onFinish }) => {
             const isCorrect = guesses[currentGuessIndex] === secretWord;
             if (isCorrect) {
                 setGameState('won');
-                vocabulary.recordQuizResult(secretWord!, true);
+                vocabulary.recordQuizResult(secretWord!, 5);
             } else if (currentGuessIndex === MAX_GUESSES - 1) {
                 setGameState('lost');
-                vocabulary.recordQuizResult(secretWord!, false);
+                vocabulary.recordQuizResult(secretWord!, 0);
             }
             // Update key statuses
             const newKeyStatuses = { ...keyStatuses };
@@ -115,6 +117,18 @@ const WordleGame: React.FC<WordleGameProps> = ({ vocabulary, onFinish }) => {
             });
         }
     }, [guesses, currentGuessIndex, gameState, secretWord, keyStatuses, vocabulary]);
+    
+    useEffect(() => {
+        if ((gameState === 'won' || gameState === 'lost') && !isFinished) {
+            addPracticeSession({
+                type: 'Wordle',
+                score: gameState === 'won' ? 1 : 0,
+                total: 1
+            });
+            setIsFinished(true);
+        }
+    }, [gameState, addPracticeSession, isFinished]);
+
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => handleKeyPress(e.key);

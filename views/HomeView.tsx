@@ -1,13 +1,8 @@
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import type { UseVocabularyReturn } from '../hooks/useVocabulary';
-import { getWordOfTheDay, getVocabularyQuote } from '../services/geminiService';
-import type { Word } from '../types';
-import Loader from '../components/Loader';
-import { Gamepad2, BookText } from 'lucide-react';
-import { INITIAL_WORDS } from '../constants';
+import { Gamepad2, BookText, Zap, BookOpen } from 'lucide-react';
 import Mascot from '../components/Mascot';
 
 interface HomeViewProps {
@@ -27,91 +22,11 @@ const activityData = [
   { name: 'Sun', words: 6 },
 ];
 
-interface Quote {
-  quote: string;
-  author: string;
-}
-
 const HomeView: React.FC<HomeViewProps> = ({ vocabulary, onNavigateToDictionary, onNavigateToPractice, userName }) => {
-    const [wordOfTheDay, setWordOfTheDay] = useState<Word | null>(null);
-    const [quote, setQuote] = useState<Quote | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isQuoteLoading, setIsQuoteLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchWord = async () => {
-            const cacheKey = 'wordOfTheDay';
-            const cachedWord = localStorage.getItem(cacheKey);
-            const now = new Date();
-
-            if (cachedWord) {
-                const { timestamp, word } = JSON.parse(cachedWord);
-                const isCacheValid = (now.getTime() - timestamp) < 24 * 60 * 60 * 1000; // 24 hours
-                if (isCacheValid) {
-                    setWordOfTheDay(word);
-                    setIsLoading(false);
-                    return;
-                }
-            }
-            
-            setIsLoading(true);
-            try {
-                const word = await getWordOfTheDay();
-                setWordOfTheDay(word);
-                const cacheData = {
-                    word,
-                    timestamp: now.getTime(),
-                };
-                localStorage.setItem(cacheKey, JSON.stringify(cacheData));
-            } catch (error) {
-                console.error("Failed to fetch word of the day", error);
-                // Set a fallback word from the initial list if the API fails
-                // This ensures a word with a definition is always available.
-                setWordOfTheDay(INITIAL_WORDS[0]);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        const fetchQuote = async () => {
-            const cacheKey = 'vocabularyQuote';
-            const cachedQuote = localStorage.getItem(cacheKey);
-            const now = new Date();
-
-            if (cachedQuote) {
-                const { timestamp, quoteData } = JSON.parse(cachedQuote);
-                const isCacheValid = (now.getTime() - timestamp) < 24 * 60 * 60 * 1000;
-                if (isCacheValid) {
-                    setQuote(quoteData);
-                    setIsQuoteLoading(false);
-                    return;
-                }
-            }
-            
-            setIsQuoteLoading(true);
-            try {
-                const quoteData = await getVocabularyQuote();
-                setQuote(quoteData);
-                const cacheData = {
-                    quoteData,
-                    timestamp: now.getTime(),
-                };
-                localStorage.setItem(cacheKey, JSON.stringify(cacheData));
-            } catch (error) {
-                console.error("Failed to fetch quote", error);
-                // Fallback is handled inside the service, but we can set quote to null
-                setQuote(null);
-            } finally {
-                setIsQuoteLoading(false);
-            }
-        };
-
-        fetchWord();
-        fetchQuote();
-    }, []);
+    const { wordsToLearn, wordsToReview } = vocabulary;
 
     return (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col h-[calc(100vh-112px)] space-y-3">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col h-[calc(100vh-112px)] space-y-4">
             <div className="animate-fade-in flex-shrink-0 flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-title font-bold text-neutral">
@@ -129,26 +44,31 @@ const HomeView: React.FC<HomeViewProps> = ({ vocabulary, onNavigateToDictionary,
                 transition={{ delay: 0.1, type: 'spring', stiffness: 200, damping: 20 }}
             >
                 <h2 className="text-xl font-title font-bold text-neutral mb-2 flex items-center">
-                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-sparkles mr-2 text-primary"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
-                   Word of the Day
+                   <Zap size={24} className="mr-2 text-primary"/>
+                   Learning Hub
                 </h2>
-                {isLoading ? <div className="h-44 flex justify-center items-center bg-base-100 rounded-xl shadow-sm"><Loader message="Fetching..." /></div> : 
-                wordOfTheDay && (
-                    <div className="bg-gradient-to-br from-primary to-teal-400 text-white p-4 rounded-2xl shadow-lg relative overflow-hidden">
-                        <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full"></div>
-                        <div className="absolute bottom-4 left-0 w-32 h-32 bg-white/10 rounded-tr-full"></div>
-                         <div className="relative z-10">
-                            <h3 className="text-2xl font-bold">{wordOfTheDay.word}</h3>
-                            <p className="opacity-80 mb-1 text-sm">{wordOfTheDay.pronunciation}</p>
-                            <p className="mb-2 font-light text-sm">{wordOfTheDay.definition}</p>
-                            <p className="italic opacity-90 bg-white/20 p-2 rounded-lg text-xs">"{wordOfTheDay.example}"</p>
-                        </div>
+                <div className="bg-gradient-to-br from-primary to-teal-400 text-white p-4 rounded-2xl shadow-lg relative overflow-hidden">
+                    <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full"></div>
+                    <div className="absolute bottom-4 left-0 w-32 h-32 bg-white/10 rounded-tr-full"></div>
+                     <div className="relative z-10">
+                        <h3 className="text-2xl font-bold">Your Next Step</h3>
+                        {wordsToReview.length > 0 ? (
+                             <>
+                                <p className="mb-2 font-light text-sm">You have {wordsToReview.length} words to review today.</p>
+                                <p className="italic opacity-90 bg-white/20 p-2 rounded-lg text-xs">"Reviewing is key to retention!"</p>
+                             </>
+                        ) : (
+                             <>
+                                <p className="mb-2 font-light text-sm">You have {wordsToLearn.length} new words to learn.</p>
+                                <p className="italic opacity-90 bg-white/20 p-2 rounded-lg text-xs">"A new word is a new world."</p>
+                             </>
+                        )}
                     </div>
-                )}
+                </div>
             </motion.div>
 
             <motion.div className="animate-slide-in-up grid grid-cols-2 gap-3 flex-shrink-0" style={{ animationDelay: '0.2s' }}>
-                <motion.button
+                 <motion.button
                     onClick={onNavigateToDictionary}
                     whileTap={{ scale: 0.98 }}
                     className="bg-base-100 p-3 rounded-xl shadow-sm flex items-center space-x-3 h-full text-left transition-transform transform hover:scale-105"
@@ -188,21 +108,6 @@ const HomeView: React.FC<HomeViewProps> = ({ vocabulary, onNavigateToDictionary,
                         <Line type="monotone" dataKey="words" stroke="var(--color-primary)" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Words Learned"/>
                     </LineChart>
                 </ResponsiveContainer>
-              </div>
-               <div className="flex-shrink-0 pt-2">
-                {isQuoteLoading ? <div className="h-12 flex items-center justify-center"><Loader /></div> : 
-                quote ? (
-                    <figure>
-                        <blockquote className="italic text-neutral-content text-center text-sm">
-                        “{quote.quote}”
-                        </blockquote>
-                        <figcaption className="text-right mt-1 text-xs font-semibold text-primary">
-                        — {quote.author}
-                        </figcaption>
-                    </figure>
-                ) : (
-                    <p className="text-neutral-content text-center text-sm">Could not load a quote today.</p>
-                )}
               </div>
             </motion.div>
         </motion.div>

@@ -1,37 +1,44 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getSynonymAntonymPair } from '../services/geminiService';
-import type { SwipeItem } from '../types';
+import api from '../services/apiService';
+import type { SwipeItem, PracticeSession } from '../types';
 import Loader from './Loader';
 
 interface SwipeGameProps {
   onFinish: () => void;
+  addPracticeSession: (sessionData: Omit<PracticeSession, 'id' | 'date'>) => void;
 }
 
 const GAME_LENGTH = 10;
 
-const SwipeGame: React.FC<SwipeGameProps> = ({ onFinish }) => {
+const SwipeGame: React.FC<SwipeGameProps> = ({ onFinish, addPracticeSession }) => {
     const [card, setCard] = useState<SwipeItem | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [round, setRound] = useState(0);
     const [score, setScore] = useState(0);
     const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
+    const [isFinished, setIsFinished] = useState(false);
 
     const fetchNextCard = useCallback(async () => {
         setFeedback(null);
         setIsLoading(true);
-        const nextCard = await getSynonymAntonymPair();
-        setCard(nextCard);
-        setIsLoading(false);
+        try {
+            const nextCard = await api.generateSynonymPair();
+            setCard(nextCard);
+        } catch(e) {
+            console.error("Failed to fetch synonym pair", e);
+            setCard(null); // Handle error case
+        } finally {
+            setIsLoading(false);
+        }
     }, []);
 
     useEffect(() => {
         fetchNextCard();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [fetchNextCard]);
 
     const handleSwipe = (isSynonymSwipe: boolean) => {
-        if (!card) return;
+        if (!card || feedback) return;
 
         const isCorrect = isSynonymSwipe === card.areSynonyms;
         if (isCorrect) {
@@ -51,7 +58,20 @@ const SwipeGame: React.FC<SwipeGameProps> = ({ onFinish }) => {
         }, 1000);
     };
     
-    if (round >= GAME_LENGTH) {
+    const isGameOver = round >= GAME_LENGTH;
+
+    useEffect(() => {
+        if (isGameOver && !isFinished) {
+            addPracticeSession({
+                type: 'Synonym Swipe',
+                score: score,
+                total: GAME_LENGTH
+            });
+            setIsFinished(true);
+        }
+    }, [isGameOver, score, addPracticeSession, isFinished]);
+
+    if (isGameOver) {
       return (
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center p-8 bg-base-100 rounded-lg shadow-xl animate-fade-in">
           <h2 className="text-3xl font-title font-bold text-primary mb-4">Game Over!</h2>
@@ -74,7 +94,7 @@ const SwipeGame: React.FC<SwipeGameProps> = ({ onFinish }) => {
                         <motion.div key="loader" exit={{ opacity: 0 }} className="absolute inset-0 flex justify-center items-center">
                              <Loader message="Loading pair..." />
                         </motion.div>
-                    ) : card && (
+                    ) : card ? (
                         <motion.div
                             key={round}
                             initial={{ scale: 0.8, opacity: 0 }}
@@ -90,6 +110,8 @@ const SwipeGame: React.FC<SwipeGameProps> = ({ onFinish }) => {
                             <div className="my-4 h-px w-1/2 bg-base-300"></div>
                             <h3 className="text-4xl font-bold text-neutral">{card.word2}</h3>
                         </motion.div>
+                    ) : (
+                        <div className="text-center p-4">Could not load word pair.</div>
                     )}
                 </AnimatePresence>
             </div>
@@ -97,7 +119,7 @@ const SwipeGame: React.FC<SwipeGameProps> = ({ onFinish }) => {
             <div className="mt-8 w-full flex justify-around">
                  <button
                     onClick={() => handleSwipe(false)}
-                    disabled={feedback !== null}
+                    disabled={feedback !== null || !card}
                     className="w-24 h-24 rounded-full bg-base-100 shadow-lg flex items-center justify-center text-error hover:bg-error/10 transition-colors disabled:opacity-50"
                     aria-label="Not Synonyms"
                 >
@@ -105,7 +127,7 @@ const SwipeGame: React.FC<SwipeGameProps> = ({ onFinish }) => {
                 </button>
                 <button
                     onClick={() => handleSwipe(true)}
-                    disabled={feedback !== null}
+                    disabled={feedback !== null || !card}
                     className="w-24 h-24 rounded-full bg-base-100 shadow-lg flex items-center justify-center text-success hover:bg-success/10 transition-colors disabled:opacity-50"
                     aria-label="Are Synonyms"
                 >

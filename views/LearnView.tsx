@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { UseVocabularyReturn } from '../hooks/useVocabulary';
 import Flashcard from '../components/Flashcard';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BrainCircuit } from 'lucide-react';
 import Mascot from '../components/Mascot';
 
 interface LearnViewProps {
@@ -10,7 +10,7 @@ interface LearnViewProps {
 }
 
 const LearnView: React.FC<LearnViewProps> = ({ vocabulary }) => {
-  const { wordsToLearn, bookmarkedWords, toggleBookmark, recordQuizResult } = vocabulary;
+  const { wordsToLearn, bookmarkedWords, toggleBookmark, recordQuizResult, fetchNewWords } = vocabulary;
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleNext = () => {
@@ -25,24 +25,46 @@ const LearnView: React.FC<LearnViewProps> = ({ vocabulary }) => {
     }
   };
   
-  const handleRate = (wordIdentifier: string, isCorrect: boolean) => {
-    recordQuizResult(wordIdentifier, isCorrect);
-    // After rating, the word is removed from `wordsToLearn`.
-    // If we are at the end of the list, we need to move back to the new last item.
+  const handleRate = (wordIdentifier: string, rating: 'hard' | 'good' | 'easy') => {
+    let quality: number;
+    switch (rating) {
+        case 'hard': quality = 2; break;
+        case 'good': quality = 4; break;
+        case 'easy': quality = 5; break;
+        default: quality = 4;
+    }
+    
+    recordQuizResult(wordIdentifier, quality);
+    
     if (wordsToLearn.length > 1 && currentIndex >= wordsToLearn.length - 1) {
       setCurrentIndex(currentIndex - 1);
     }
-    // Otherwise, the next word will slide into the current index, so no index change is needed.
   };
+  
+  const handleFetchNewWords = async () => {
+      await fetchNewWords();
+      // After fetching, new words will be in wordsToLearn. 
+      // We can reset index to start from the first new word.
+      if(wordsToLearn.length === 0) {
+         setCurrentIndex(0);
+      }
+  }
 
   const currentWord = wordsToLearn[currentIndex];
 
   if (wordsToLearn.length === 0) {
     return (
       <div className="text-center p-8 flex flex-col items-center justify-center h-[calc(100vh-112px)]">
-        <Mascot message="You're a vocabulary superstar! You've learned everything for now." />
-        <h2 className="text-2xl font-bold text-success mt-4 mb-2">Congratulations!</h2>
-        <p className="text-neutral-content">Check back later for more words.</p>
+        <Mascot message="You're a vocabulary superstar! Ready for another challenge?" />
+        <h2 className="text-2xl font-bold text-success mt-4 mb-2">All Words Learned!</h2>
+        <p className="text-neutral-content mb-6">You've gone through all the current words.</p>
+        <button 
+          onClick={handleFetchNewWords} 
+          className="bg-primary text-white font-bold py-3 px-6 rounded-lg hover:bg-primary-focus transition-colors flex items-center space-x-2 shadow-lg"
+        >
+          <BrainCircuit size={20} />
+          <span>Learn More Words</span>
+        </button>
       </div>
     );
   }
